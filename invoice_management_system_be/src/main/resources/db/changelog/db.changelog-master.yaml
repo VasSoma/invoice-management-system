@@ -1,0 +1,280 @@
+databaseChangeLog:
+  - preConditions:
+      - runningAs:
+          username: admin
+
+  - changeSet:
+      id: create-role-users-user_role-invoice-tables
+      author: admin
+      labels: create-role-users-user_role-invoice-tables
+      changes:
+        - createTable:
+            tableName: role
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: description
+                  type: varchar(200)
+                  constraints:
+                    nullable: false
+
+        - createTable:
+            tableName: users
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: username
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: password
+                  type: varchar(68)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: entry_date
+                  type: date
+        - addForeignKeyConstraint:
+            baseTableName: users
+            baseColumnNames: id
+            referencedTableName: role
+            referencedColumnNames: id
+            constraintName: fk_users_role
+
+        - createTable:
+            tableName: user_role
+            columns:
+              - column:
+                  name: user_id
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: role_id
+                  type: int
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: user_role
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_user_role_user
+        - addForeignKeyConstraint:
+            baseTableName: user_role
+            baseColumnNames: role_id
+            referencedTableName: role
+            referencedColumnNames: id
+            constraintName: fk_user_role_role
+        - addPrimaryKey:
+            tableName: user_role
+            columnNames: user_id, role_id
+
+        - createTable:
+            tableName: invoice
+            columns:
+              - column:
+                  name: id
+                  type: int
+              - column:
+                  name: customer_name
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: issue_date
+                  type: date
+                  constraints:
+                    nullable: false
+              - column:
+                  name: due_date
+                  type: date
+                  constraints:
+                    nullable: false
+              - column:
+                  name: item_name
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: description
+                  type: varchar(200)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: total_amount
+                  type: numeric(10, 2)
+
+  - changeSet:
+      id: add-admin-accountant-standard_user-roles-to-role-table
+      author: admin
+      changes:
+        - insert:
+            tableName: role
+            columns:
+              - column:
+                  name: name
+                  value: ADMINISTRATOR
+              - column:
+                  name: description
+                  value: "Administrator has the authorization to see all pages."
+        - insert:
+            tableName: role
+            columns:
+                - column:
+                    name: name
+                    value: ACCOUNTANT
+                - column:
+                    name: description
+                    value: "Accountant has the authorization to create invoices and see all invoices. Can't see the admin page."
+        - insert:
+            tableName: role
+            columns:
+                - column:
+                    name: name
+                    value: STANDARD_USER
+                - column:
+                    name: description
+                    value: "Standard user has the authorization to see all invoices."
+
+  - changeSet:
+      id: add-admin-user-to-users-table
+      author: admin
+      changes:
+        - insert:
+            tableName: users
+            columns:
+              - column:
+                  name: name
+                  value: Administrator
+              - column:
+                  name: username
+                  value: admin
+              - column:
+                  name: password
+                  value: "$2a$12$X20DOta2bzfE1xn9aRzxyOG5rbhDR3f.Lu2aqC3AH3soF1Kql.DPW"
+              - column:
+                  name: entry_date
+                  value: 2024-11-01
+
+  - changeSet:
+      id: set-admin-roles-in-user-role-table
+      author: admin
+      changes:
+          - insert:
+              tableName: user_role
+              columns:
+                - column:
+                    name: user_id
+                    value: 1
+                - column:
+                    name: role_id
+                    value: 1
+          - insert:
+              tableName: user_role
+              columns:
+                - column:
+                    name: user_id
+                    value: 1
+                - column:
+                    name: role_id
+                    value: 2
+          - insert:
+              tableName: user_role
+              columns:
+                - column:
+                    name: user_id
+                    value: 1
+                - column:
+                    name: role_id
+                    value: 3
+
+  - changeSet:
+      id: add-test-users-to-users-table
+      author: admin
+      changes:
+        - insert:
+            tableName: users
+            columns:
+              - column:
+                  name: name
+                  value: John Doe
+              - column:
+                  name: username
+                  value: johndoe
+              - column:
+                  name: password
+                  value: "$2a$12$ihdqogdLgj3eth9UgGdQpuo3dmVFPvO1iUoCej//VFnKcV/DIv9CG"
+              - column:
+                  name: entry_date
+                  value: 2024-11-02
+        - insert:
+            tableName: users
+            columns:
+              - column:
+                  name: name
+                  value: Jane Doe
+              - column:
+                  name: username
+                  value: janedoe
+              - column:
+                  name: password
+                  value: "$2a$12$jlSeoreIbXjFfAyV4D1OJeejctBVAM/Vn5VFu6yGo7zwdNDJGGwBm"
+              - column:
+                  name: entry_date
+                  value: 2024-11-03
+
+  - changeSet:
+      id: set-roles-for-test-users-in-user-role-table
+      author: admin
+      changes:
+        - insert:
+            tableName: user_role
+            columns:
+              - column:
+                  name: user_id
+                  value: 2
+              - column:
+                  name: role_id
+                  value: 3
+        - insert:
+            tableName: user_role
+            columns:
+              - column:
+                  name: user_id
+                  value: 3
+              - column:
+                  name: role_id
+                  value: 2
+        - insert:
+            tableName: user_role
+            columns:
+              - column:
+                  name: user_id
+                  value: 3
+              - column:
+                  name: role_id
+                  value: 3
